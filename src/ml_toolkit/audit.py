@@ -91,3 +91,15 @@ def infinite_value_report(df: pd.DataFrame) -> pd.DataFrame:
     result.columns = ["feature", "infinite_count"]
     return result
 
+
+
+def cardinality_report(df: pd.DataFrame) -> pd.DataFrame:
+    """Reports the unique value count for categorical features."""
+    categorical_cols = df.select_dtypes(include=["object", "category"]).columns
+    
+    return pd.DataFrame({
+        "feature": categorical_cols,
+        "n_unique": [df[col].nunique(dropna=False) for col in categorical_cols]
+    }).sort_values("n_unique", ascending=False).reset_index(drop=True)
+
+
