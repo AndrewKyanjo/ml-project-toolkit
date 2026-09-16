@@ -112,3 +112,17 @@ def constant_feature_report(df: pd.DataFrame) -> pd.DataFrame:
     report["is_strictly_constant"] = report["dominant_percentage"] == 100.0
     
     return report.sort_values("dominant_percentage", ascending=False).reset_index(drop=True)
+
+
+def numeric_profile(df: pd.DataFrame) -> pd.DataFrame:
+    """Enhances the standard describe() output with median, skew, and unique counts."""
+    numeric_cols = df.select_dtypes(include=np.number).columns
+    if len(numeric_cols) == 0:
+        return pd.DataFrame()
+        
+    summary = df[numeric_cols].describe().T
+    summary["median"] = df[numeric_cols].median()
+    summary["skew"] = df[numeric_cols].skew()
+    summary["n_unique"] = df[numeric_cols].nunique()
+    
+    return summary.sort_values("skew", ascending=False)
