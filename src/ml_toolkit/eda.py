@@ -111,3 +111,34 @@ def numeric_target_rate_by_quantile(df: pd.DataFrame, feature: str, target: str,
     result["target_rate_pct"] = result["target_rate"] * 100
     return result.reset_index()
 
+
+
+# ==========================================
+# 4. CORRELATIONS
+# ==========================================
+
+def correlation_matrix(df: pd.DataFrame, columns: list[str], method: str = "pearson") -> pd.DataFrame:
+    """Returns the correlation matrix for the specified numerical columns."""
+    return df[columns].corr(method=method)
+
+
+def high_correlation_pairs(corr_matrix: pd.DataFrame, threshold: float = 0.85) -> pd.DataFrame:
+    """Extracts feature pairs that exceed the absolute correlation threshold."""
+    pairs = []
+    cols = corr_matrix.columns
+    
+    for i in range(len(cols)):
+        for j in range(i + 1, len(cols)):
+            corr = corr_matrix.iloc[i, j]
+            if abs(corr) >= threshold:
+                pairs.append({
+                    "feature_1": cols[i],
+                    "feature_2": cols[j],
+                    "correlation": corr
+                })
+                
+    if not pairs:
+        return pd.DataFrame(columns=["feature_1", "feature_2", "correlation"])
+        
+    return pd.DataFrame(pairs).sort_values("correlation", key=abs, ascending=False).reset_index(drop=True)
+
