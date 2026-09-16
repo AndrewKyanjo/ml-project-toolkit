@@ -82,3 +82,32 @@ def category_normalization_check(df: pd.DataFrame, columns: list[str]) -> pd.Dat
     return pd.DataFrame(records)
 
 
+# ==========================================
+# 3. TARGET RELATIONSHIPS (RISK ANALYSIS)
+# ==========================================
+
+def categorical_target_rate(df: pd.DataFrame, feature: str, target: str) -> pd.DataFrame:
+    """Calculates the positive rate (e.g., default rate) for each category."""
+    summary = df.groupby(feature, dropna=False)[target].agg(
+        count="count",
+        positives="sum",
+        target_rate="mean"
+    ).sort_values("target_rate", ascending=False)
+    
+    summary["target_rate_pct"] = summary["target_rate"] * 100
+    return summary.reset_index()
+
+
+def numeric_target_rate_by_quantile(df: pd.DataFrame, feature: str, target: str, bins: int = 10) -> pd.DataFrame:
+    """Bins a continuous feature into quantiles and calculates the target rate per bin."""
+    temp = df[[feature, target]].dropna().copy()
+    temp["bin"] = pd.qcut(temp[feature], q=bins, duplicates="drop")
+    
+    result = temp.groupby("bin", observed=True)[target].agg(
+        count="count",
+        positives="sum",
+        target_rate="mean"
+    )
+    result["target_rate_pct"] = result["target_rate"] * 100
+    return result.reset_index()
+
