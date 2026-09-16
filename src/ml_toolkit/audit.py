@@ -75,7 +75,6 @@ def hidden_missing_report(df: pd.DataFrame) -> pd.DataFrame:
     return result.sort_values("hidden_missing_count", ascending=False)
 
 
-
 def infinite_value_report(df: pd.DataFrame) -> pd.DataFrame:
     """Checks all numeric columns for infinite values."""
     numeric_cols = df.select_dtypes(include=np.number).columns
@@ -92,7 +91,6 @@ def infinite_value_report(df: pd.DataFrame) -> pd.DataFrame:
     return result
 
 
-
 def cardinality_report(df: pd.DataFrame) -> pd.DataFrame:
     """Reports the unique value count for categorical features."""
     categorical_cols = df.select_dtypes(include=["object", "category"]).columns
@@ -103,3 +101,14 @@ def cardinality_report(df: pd.DataFrame) -> pd.DataFrame:
     }).sort_values("n_unique", ascending=False).reset_index(drop=True)
 
 
+def constant_feature_report(df: pd.DataFrame) -> pd.DataFrame:
+    """Identifies constant features and near-constant (highly dominant) features."""
+    dominant_pct = {
+        col: df[col].value_counts(normalize=True, dropna=False).iloc[0] * 100
+        for col in df.columns
+    }
+    
+    report = pd.DataFrame(list(dominant_pct.items()), columns=["feature", "dominant_percentage"])
+    report["is_strictly_constant"] = report["dominant_percentage"] == 100.0
+    
+    return report.sort_values("dominant_percentage", ascending=False).reset_index(drop=True)
