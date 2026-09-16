@@ -73,3 +73,21 @@ def hidden_missing_report(df: pd.DataFrame) -> pd.DataFrame:
     result = pd.Series(blank_summary, name="hidden_missing_count").to_frame()
     result["percentage"] = (result["hidden_missing_count"] / len(df)) * 100
     return result.sort_values("hidden_missing_count", ascending=False)
+
+
+
+def infinite_value_report(df: pd.DataFrame) -> pd.DataFrame:
+    """Checks all numeric columns for infinite values."""
+    numeric_cols = df.select_dtypes(include=np.number).columns
+    infinite_counts = pd.Series({
+        column: np.isinf(df[column]).sum()
+        for column in numeric_cols
+    })
+    
+    result = infinite_counts[infinite_counts > 0].reset_index()
+    if result.empty:
+        return pd.DataFrame(columns=["feature", "infinite_count"])
+        
+    result.columns = ["feature", "infinite_count"]
+    return result
+
