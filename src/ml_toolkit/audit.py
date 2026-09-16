@@ -47,3 +47,16 @@ def missingness_report(df: pd.DataFrame) -> pd.DataFrame:
     missing_counts["percentage"] = (missing_counts["missing_count"] / len(df)) * 100
     
     return missing_counts.sort_values("missing_count", ascending=False).reset_index(drop=True)
+
+
+def schema_report(df: pd.DataFrame) -> pd.DataFrame:
+    """Returns a master audit table summarizing column types, missingness, and uniqueness."""
+    audit_table = pd.DataFrame({
+        "dtype": df.dtypes.astype(str),
+        "missing_count": df.isna().sum(),
+        "missing_pct": df.isna().mean() * 100,
+        "n_unique": df.nunique(dropna=False),
+    })
+    audit_table["unique_pct"] = (audit_table["n_unique"] / len(df)) * 100
+    return audit_table.sort_values("missing_pct", ascending=False)
+
