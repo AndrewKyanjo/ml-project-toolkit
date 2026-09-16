@@ -35,8 +35,7 @@ def missingness_report(df: pd.DataFrame) -> pd.DataFrame:
     Returns a DataFrame of columns that contain missing values, 
     including their counts and percentages.
     """
-    # Note: I wrote the actual missingness logic here, as your 
-    # snippet accidentally duplicated the row logic!
+    
     missing_counts = df.isna().sum()
     missing_counts = missing_counts[missing_counts > 0].reset_index()
     
@@ -60,3 +59,17 @@ def schema_report(df: pd.DataFrame) -> pd.DataFrame:
     audit_table["unique_pct"] = (audit_table["n_unique"] / len(df)) * 100
     return audit_table.sort_values("missing_pct", ascending=False)
 
+
+def hidden_missing_report(df: pd.DataFrame) -> pd.DataFrame:
+    """Detects blank strings or whitespace disguised as valid data in categorical columns."""
+    categorical_cols = df.select_dtypes(include=["object", "category"]).columns
+    blank_summary = {}
+    
+    for column in categorical_cols:
+        blanks = df[column].astype(str).str.strip().eq("").sum()
+        if blanks > 0:
+            blank_summary[column] = blanks
+            
+    result = pd.Series(blank_summary, name="hidden_missing_count").to_frame()
+    result["percentage"] = (result["hidden_missing_count"] / len(df)) * 100
+    return result.sort_values("hidden_missing_count", ascending=False)
