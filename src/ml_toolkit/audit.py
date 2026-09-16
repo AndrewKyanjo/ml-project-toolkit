@@ -14,6 +14,7 @@ def target_report(df: pd.DataFrame, target_col: str) -> pd.DataFrame:
     
     return summary
 
+
 def id_report(df: pd.DataFrame, id_col: str) -> dict:
     """Audits the unique identifier column for missing or duplicate values."""
     return {
@@ -22,3 +23,8 @@ def id_report(df: pd.DataFrame, id_col: str) -> dict:
         "missing_ids": int(df[id_col].isna().sum()),
         "duplicate_ids": int(df[id_col].duplicated().sum())
     }
+
+
+def duplicate_report(df: pd.DataFrame) -> int:
+    """Returns the total number of exact duplicate rows in the dataset."""
+    return int(df.duplicated().sum())
