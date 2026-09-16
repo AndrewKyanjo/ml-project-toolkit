@@ -63,3 +63,22 @@ def iqr_outlier_summary(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
         .sort_values("outlier_pct", ascending=False)
         .reset_index(drop=True)
     )
+    
+    
+def category_normalization_check(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
+    """Detects categories that would merge if stripped of whitespace and lowercased."""
+    records = []
+    for col in columns:
+        orig = df[col].nunique(dropna=False)
+        norm = df[col].astype(str).str.strip().str.lower().nunique(dropna=False)
+        
+        if norm < orig:
+            records.append({
+                "feature": col, 
+                "original_unique": orig, 
+                "normalized_unique": norm
+            })
+            
+    return pd.DataFrame(records)
+
+
