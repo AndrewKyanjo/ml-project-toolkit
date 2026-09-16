@@ -148,3 +148,42 @@ def high_correlation_pairs(
         .sort_values("correlation", key=abs, ascending=False)
         .reset_index(drop=True)
     )
+
+
+
+
+
+# ==========================================
+# 5. VISUALIZATIONS
+# ==========================================
+
+def plot_numeric_distribution(df: pd.DataFrame, column: str):
+    """Plots a histogram and boxplot side-by-side for a numeric feature."""
+    fig, axes = plt.subplots(1, 2, figsize=(14, 4))
+    
+    sns.histplot(data=df, x=column, kde=True, ax=axes[0])
+    axes[0].set_title(f"{column} — Distribution")
+    
+    sns.boxplot(data=df, x=column, ax=axes[1])
+    axes[1].set_title(f"{column} — Boxplot")
+    
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_numeric_by_target(df: pd.DataFrame, feature: str, target: str):
+    """Plots the overlapping density distribution of a feature split by the target class."""
+    plt.figure(figsize=(10, 5))
+    
+    sns.histplot(
+        data=df, 
+        x=feature, 
+        hue=target, 
+        stat="density", 
+        common_norm=False, 
+        element="step", 
+        kde=True
+    )
+    
+    plt.title(f"{feature} Distribution by {target}")
+    plt.show()
