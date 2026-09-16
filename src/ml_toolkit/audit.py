@@ -126,3 +126,21 @@ def numeric_profile(df: pd.DataFrame) -> pd.DataFrame:
     summary["n_unique"] = df[numeric_cols].nunique()
     
     return summary.sort_values("skew", ascending=False)
+
+
+def run_data_audit(df: pd.DataFrame, target_col: str, id_col: str) -> dict:
+    """Master wrapper that executes all audit checks and returns a dictionary of reports."""
+    # Assuming target_report, id_report, missingness_report, duplicate_report 
+    # from the previous step are also in this file.
+    return {
+        "schema": schema_report(df),
+        "target": target_report(df, target_col),
+        "id": id_report(df, id_col),
+        "duplicates": duplicate_report(df),
+        "missingness": missingness_report(df),
+        "hidden_missingness": hidden_missing_report(df),
+        "infinite_values": infinite_value_report(df),
+        "cardinality": cardinality_report(df),
+        "constant_features": constant_feature_report(df),
+        "numeric_profile": numeric_profile(df)
+    }
