@@ -7,7 +7,7 @@ name = "ml_toolkit"
 version = "0.1.0"
 description = "Reusable Machine Learning Toolkit"
 authors = [
-    {name = "Andrew Carson"}
+    {name = "Andrew Wamala Kyanjo"}
 ]
 dependencies = [
     "pandas",
