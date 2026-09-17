@@ -1,6 +1,5 @@
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 import seaborn as sns
 
 # ==========================================
@@ -63,21 +62,6 @@ def iqr_outlier_summary(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
         .sort_values("outlier_pct", ascending=False)
         .reset_index(drop=True)
     )
-
-
-def category_normalization_check(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
-    """Detects categories that would merge if stripped of whitespace and lowercased."""
-    records = []
-    for col in columns:
-        orig = df[col].nunique(dropna=False)
-        norm = df[col].astype(str).str.strip().str.lower().nunique(dropna=False)
-
-        if norm < orig:
-            records.append(
-                {"feature": col, "original_unique": orig, "normalized_unique": norm}
-            )
-
-    return pd.DataFrame(records)
 
 
 # ==========================================
@@ -169,6 +153,19 @@ def plot_numeric_distribution(df: pd.DataFrame, column: str):
     plt.show()
 
 
+def plot_categorical_distribution(df: pd.DataFrame, column: str, top_n: int = 15):
+    """Plots a horizontal bar chart of category frequencies for a categorical feature."""
+    counts = df[column].value_counts(dropna=False).head(top_n)
+
+    plt.figure(figsize=(10, max(3, 0.4 * len(counts))))
+    sns.barplot(x=counts.values, y=counts.index.astype(str), orient="h")
+    plt.title(f"{column} — Category Frequency" + (f" (top {top_n})" if len(counts) == top_n else ""))
+    plt.xlabel("Count")
+    plt.ylabel(column)
+    plt.tight_layout()
+    plt.show()
+
+
 def plot_numeric_by_target(df: pd.DataFrame, feature: str, target: str):
     """Plots the overlapping density distribution of a feature split by the target class."""
     plt.figure(figsize=(10, 5))
@@ -184,4 +181,39 @@ def plot_numeric_by_target(df: pd.DataFrame, feature: str, target: str):
     )
 
     plt.title(f"{feature} Distribution by {target}")
+    plt.show()
+
+
+def plot_categorical_target_rate(df: pd.DataFrame, feature: str, target: str):
+    """Plots the target rate (e.g., default rate) per category as a horizontal bar chart."""
+    summary = categorical_target_rate(df, feature, target)
+
+    plt.figure(figsize=(10, max(3, 0.4 * len(summary))))
+    sns.barplot(data=summary, x="target_rate_pct", y=feature, orient="h")
+    plt.title(f"{target} Rate by {feature}")
+    plt.xlabel(f"{target} rate (%)")
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_numeric_target_rate(df: pd.DataFrame, feature: str, target: str, bins: int = 10):
+    """Plots the target rate across quantile bins of a numeric feature."""
+    summary = numeric_target_rate_by_quantile(df, feature, target, bins=bins)
+
+    plt.figure(figsize=(10, 5))
+    sns.lineplot(x=summary["bin"].astype(str), y=summary["target_rate_pct"], marker="o")
+    plt.xticks(rotation=45, ha="right")
+    plt.title(f"{target} Rate across {feature} Quantile Bins")
+    plt.ylabel(f"{target} rate (%)")
+    plt.xlabel(feature)
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_correlation_heatmap(corr_matrix: pd.DataFrame):
+    """Plots a heatmap of a precomputed correlation matrix."""
+    plt.figure(figsize=(0.8 * len(corr_matrix.columns) + 2, 0.8 * len(corr_matrix.columns) + 2))
+    sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap="coolwarm", center=0, vmin=-1, vmax=1)
+    plt.title("Correlation Matrix")
+    plt.tight_layout()
     plt.show()
